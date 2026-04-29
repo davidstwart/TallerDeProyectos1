@@ -9,6 +9,13 @@ from fastapi.responses import JSONResponse
 
 from infrastructure.frameworks.fastapi.ia_lab_router import router as ia_lab_router
 
+from pydantic import BaseModel, EmailStr
+from infrastructure.adapters.output.mysql_user_repository import MySQLUserRepository
+from application.useCases.auth_use_case import AuthUseCase
+from enum import Enum
+from fastapi import HTTPException, status
+
+
 app = FastAPI(
     title="Laboratorio Interactivo de IA",
     description=(
@@ -19,6 +26,16 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+# --- .INICIALIZACIÓN DE COMPONENTES ---
+user_repo = MySQLUserRepository()
+auth_service = AuthUseCase(user_repo)
+
+# --- .DTOs (Data Transfer Objects) ---
+class UserAuth(BaseModel):
+    email: EmailStr
+    password: str
+    rol: str = "estudiante"
 
 # ── CORS ──────────────────────────────────────────────────────────────────────
 # allow_origins=["*"] es seguro aquí porque no se usan cookies ni credenciales.
@@ -49,3 +66,55 @@ app.include_router(ia_lab_router)
 @app.get("/health", tags=["Health"])
 def health_check():
     return {"status": "ok", "service": "ia-lab"}
+
+
+# =================================================
+#roles
+class UserRole(str, Enum):
+    estudiante = "estudiante"
+    profesor = "profesor"
+
+# .Esquemas para recibir datos
+class RegisterRequest(BaseModel):
+    email: EmailStr
+    password: str
+    rol: UserRole = UserRole.estudiante
+
+# .Esquema para Login
+class LoginRequest(BaseModel):
+    email: EmailStr
+    password: str
+
+# ── .Rutas de Autenticación ────────────────────────────────────────────────────
+
+
+@app.post("/register", tags=["Auth"], status_code=status.HTTP_201_CREATED)
+def register(user_data: RegisterRequest):
+    try:
+        return auth_service.register(user_data.email, user_data.password, user_data.rol)
+    except Exception as e:
+        
+        error_msg = str(e)
+        if "Duplicate entry" in error_msg:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, 
+                detail="Este correo electrónico ya está registrado."
+            )
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            detail="No se pudo completar el registro. Inténtalo más tarde."
+        )
+
+@app.post("/login", tags=["Auth"])
+def login(user_data: LoginRequest):
+    result = auth_service.login(user_data.email, user_data.password)
+    
+    if not result:
+        
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Correo o contraseña incorrectos.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    return result
