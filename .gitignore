@@ -4,7 +4,6 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
 # Distribución / packaging
 .Python
 build/
@@ -125,3 +124,5 @@ datasets/
 # =========================
 *.swp
 *.bak
+*.pyc
+*.pyo
