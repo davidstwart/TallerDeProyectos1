@@ -1,0 +1,127 @@
+# =========================
+# 🔹 Python
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribución / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# =========================
+# 🔹 Entornos virtuales
+# =========================
+venv/
+.env/
+.env.*
+.venv/
+ENV/
+env/
+
+# =========================
+# 🔹 Archivos de entorno
+# =========================
+.env
+.env.local
+.env.development
+.env.production
+
+# =========================
+# 🔹 Logs
+# =========================
+*.log
+logs/
+*.out
+
+# =========================
+# 🔹 IDEs / Editores
+# =========================
+
+# VS Code
+.vscode/
+
+# JetBrains (PyCharm, etc.)
+.idea/
+
+# Cursor
+.cursor/
+
+# =========================
+# 🔹 Sistema operativo
+# =========================
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Mac
+.DS_Store
+
+# =========================
+# 🔹 Cache herramientas
+# =========================
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.cache/
+
+# =========================
+# 🔹 Jupyter / Data Science
+# =========================
+.ipynb_checkpoints/
+
+# =========================
+# 🔹 Archivos temporales
+# =========================
+*.tmp
+*.temp
+
+# =========================
+# 🔹 Build / compilación
+# =========================
+*.so
+*.dll
+*.dylib
+
+# =========================
+# 🔹 Coverage / testing
+# =========================
+.coverage
+coverage.xml
+htmlcov/
+
+# =========================
+# 🔹 Archivos específicos del proyecto
+# =========================
+
+# Datos generados (IA / datasets)
+data/
+datasets/
+*.csv
+*.xlsx
+*.parquet
+
+# Modelos entrenados
+*.pkl
+*.joblib
+
+# =========================
+# 🔹 Otros
+# =========================
+*.swp
+*.bak
