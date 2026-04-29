@@ -1,7 +1,16 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../App.css";
 
 function Login() {
+  const navigate = useNavigate();
+
+  const iniciarSesion = (e) => {
+    e.preventDefault();
+
+    // Más adelante aquí irá la validación real del usuario.
+    navigate("/laboratorio");
+  };
+
   return (
     <div className="login-page">
       <div className="login-container">
@@ -42,19 +51,28 @@ function Login() {
           </Link>
 
           <h2>Iniciar sesión</h2>
+
           <p className="login-subtitle">
             Ingresa tus datos para continuar en la plataforma.
           </p>
 
-          <form className="login-form">
+          <form className="login-form" onSubmit={iniciarSesion}>
             <div className="form-group">
               <label>Correo electrónico</label>
-              <input type="email" placeholder="ejemplo@correo.com" />
+              <input
+                type="email"
+                placeholder="ejemplo@correo.com"
+                required
+              />
             </div>
 
             <div className="form-group">
               <label>Contraseña</label>
-              <input type="password" placeholder="Ingresa tu contraseña" />
+              <input
+                type="password"
+                placeholder="Ingresa tu contraseña"
+                required
+              />
             </div>
 
             <div className="login-options">
@@ -71,9 +89,9 @@ function Login() {
             </button>
           </form>
 
-<p className="login-register">
-  ¿No tienes cuenta? <Link to="/registro">Regístrate aquí</Link>
-</p>
+          <p className="login-register">
+            ¿No tienes cuenta? <Link to="/registro">Regístrate aquí</Link>
+          </p>
         </section>
       </div>
     </div>
