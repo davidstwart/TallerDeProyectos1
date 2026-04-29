@@ -35,6 +35,10 @@ class PredictRequest(BaseModel):
         description="Valores de las features para predecir"
     )
 
+class LoadModelRequest(BaseModel):
+    model_id: str
+
+
 
 # ── Response DTOs ─────────────────────────────────────────────────────────────
 

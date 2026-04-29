@@ -210,6 +210,32 @@ class IALabUseCase(IIALabInputPort):
             test_samples=len(X_test),
             session_id=session_id,
         )
+    
+
+    # ── Model Loading ────────────────────────────────────────────────────────────
+
+    def load_model(self, model_id: str) -> str:
+        """
+        Carga un modelo previamente guardado y crea una nueva sesión.
+        """
+        model_data = self._repo.load_model(model_id)
+
+        if model_data is None:
+            raise ValueError(f"Modelo '{model_id}' no encontrado.")
+
+        session_id = str(uuid.uuid4())
+
+        # reutilizamos el mismo formato que usas en train_model
+        self._repo.save_trained_model(
+            session_id,
+            model_data["model"],
+            model_data["scaler"],
+            model_data["feature_names"],
+            model_data["model_name"],
+        )
+
+        return session_id
+
 
     # ── Prediction ────────────────────────────────────────────────────────────
 

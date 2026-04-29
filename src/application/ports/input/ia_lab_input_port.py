@@ -36,6 +36,13 @@ class IIALabInputPort(ABC):
         """Entrena un modelo sobre el dataset de la sesión."""
 
     @abstractmethod
+    def load_model(self, model_id: str) -> str:
+        """
+        Carga un modelo previamente persistido y crea una nueva sesión.
+        Retorna el nuevo session_id.
+        """
+
+    @abstractmethod
     def predict(
         self,
         session_id: str,

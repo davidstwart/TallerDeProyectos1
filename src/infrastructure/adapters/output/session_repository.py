@@ -1,4 +1,6 @@
 import time
+import os
+import joblib
 from collections import OrderedDict
 from typing import Any, Dict, Optional
 import pandas as pd
@@ -24,6 +26,8 @@ class InMemorySessionRepository(ISessionRepository):
         # OrderedDict para LRU: el más reciente al final
         self._dataframes: OrderedDict[str, dict] = OrderedDict()
         self._models: Dict[str, Dict[str, Any]] = {}
+        self._models_dir = "models"
+        os.makedirs(self._models_dir, exist_ok=True)
 
     # ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -85,6 +89,40 @@ class InMemorySessionRepository(ISessionRepository):
 
     def get_trained_model(self, session_id: str) -> Optional[Dict[str, Any]]:
         return self._models.get(session_id)
+    
+    def persist_model(
+        self,
+        model_id: str,
+        model: Any,
+        scaler: Any,
+        feature_names: list,
+        model_name: str,
+    ) -> None:
+        path = os.path.join(self._models_dir, f"{model_id}.pkl")
+
+        payload = {
+            "model": model,
+            "scaler": scaler,
+            "feature_names": feature_names,
+            "model_name": model_name,
+        }
+
+        joblib.dump(payload, path)
+
+    def load_model(self, model_id: str) -> Optional[Dict[str, Any]]:
+        path = os.path.join(self._models_dir, f"{model_id}.pkl")
+
+        if not os.path.exists(path):
+            return None
+
+        return joblib.load(path)
 
     def session_exists(self, session_id: str) -> bool:
         return session_id in self._dataframes
+
+    def list_models(self) -> list[str]:
+        return [
+            f.replace(".pkl", "")
+            for f in os.listdir(self._models_dir)
+            if f.endswith(".pkl")
+        ]

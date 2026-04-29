@@ -11,6 +11,13 @@ class ModelParams:
 
 
 @dataclass
+class LoadedModel:
+    """Modelo cargado en memoria para predicción."""
+    model: Any
+    model_name: str
+    feature_names: List[str]
+
+@dataclass
 class TrainingResult:
     """Resultado del entrenamiento de un modelo."""
     model_name: str
@@ -33,7 +40,7 @@ class PredictionResult:
     prediction: Any
     probabilities: Optional[Dict[str, float]] = None
     model_name: str = ""
-
+    input_features: Optional[Dict[str, Any]] = None
 
 @dataclass
 class DatasetInfo:

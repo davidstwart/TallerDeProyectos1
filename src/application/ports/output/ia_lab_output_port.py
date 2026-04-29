@@ -26,9 +26,29 @@ class ISessionRepository(ABC):
         """Persiste el modelo entrenado y su scaler."""
 
     @abstractmethod
+    def persist_model(
+        self,
+        model_id: str,
+        model: Any,
+        scaler: Any,
+        feature_names: list,
+        model_name: str,
+    ) -> None:
+        """Guarda el modelo entrenado en almacenamiento persistente (ej: disco)."""
+
+
+    @abstractmethod
+    def load_model(self, model_id: str) -> Optional[Dict[str, Any]]:
+        """Carga un modelo persistido por model_id."""
+
+    @abstractmethod
     def get_trained_model(self, session_id: str) -> Optional[Dict[str, Any]]:
         """Recupera el modelo entrenado de la sesión o None si no existe."""
 
     @abstractmethod
     def session_exists(self, session_id: str) -> bool:
         """Verifica si una sesión existe."""
+
+    @abstractmethod
+    def list_models(self) -> list[str]:
+        """Lista los modelos disponibles en almacenamiento."""

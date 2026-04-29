@@ -5,6 +5,7 @@ from application.dto.ia_lab_dto import (
     GenerateDatasetRequest,
     ModelsInfoResponse,
     PredictRequest,
+    LoadModelRequest,
     PredictResponse,
     TrainModelRequest,
     TrainModelResponse,
@@ -169,6 +170,33 @@ def train_model(
         train_samples=result.train_samples,
         test_samples=result.test_samples,
     )
+
+# ── 6. Cargar modelo ───────────────────────────────────────────────────────────────
+
+@router.post(
+    "/model/load",
+    summary="Cargar un modelo previamente entrenado",
+    status_code=201,
+)
+def load_model(
+    body: LoadModelRequest,
+    uc: IALabUseCase = Depends(get_use_case),
+):
+    """
+    Carga un modelo persistido (desde disco) y genera una nueva sesión
+    para realizar predicciones sin re-entrenar.
+    """
+    try:
+        session_id = uc.load_model(model_id=body.model_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+    return {
+        "session_id": session_id,
+        "message": "Modelo cargado correctamente"
+    }
 
 
 # ── 6. Predecir ───────────────────────────────────────────────────────────────
