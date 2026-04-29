@@ -1,38 +1,66 @@
 from sqlalchemy import create_engine, Column, Integer, String
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base
 from domain.models.user import User as DomainUser
+
+DATABASE_URL = "mysql+pymysql://root:@localhost:3306/EduIA"
+# si tienes password → root:admin
 
 Base = declarative_base()
 
-class UserTable(Base):
-    __tablename__ = "usuario"
-    id_usuario = Column(Integer, primary_key=True, autoincrement=True)
-    email = Column(String(100), unique=True)
-    password = Column(String(255))
-    rol = Column(String(20))
 
+# ── Modelo DB ─────────────────────────────────────────
+class UserORM(Base):
+    __tablename__ = "usuario"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(100), unique=True, index=True)
+    password = Column(String(255))
+    rol = Column(String(50))
+
+
+# ── Repository ────────────────────────────────────────
 class MySQLUserRepository:
     def __init__(self):
-        # AJUSTA AQUÍ: usuario:contraseña@localhost/nombre_bd
-        self.engine = create_engine("mysql+pymysql://root:admin@localhost:3306/EduIA")
-        Base.metadata.create_all(bind=self.engine)
+        self.engine = create_engine(DATABASE_URL)
         self.SessionLocal = sessionmaker(bind=self.engine)
+        Base.metadata.create_all(bind=self.engine)
 
+    # ✔️ coincide con use case
     def save(self, user: DomainUser):
-        session = self.SessionLocal()
-        db_user = UserTable(email=user.email, password=user.password, rol=user.rol)
-        session.add(db_user)
-        session.commit()
-        session.refresh(db_user)
-        user.id_usuario = db_user.id_usuario
-        session.close()
-        return user
+        db = self.SessionLocal()
+        try:
+            user_db = UserORM(
+                email=user.email,
+                password=user.password,
+                rol=user.rol,
+            )
+            db.add(user_db)
+            db.commit()
+            db.refresh(user_db)
 
+            return DomainUser(
+                user_db.id,
+                user_db.email,
+                user_db.password,
+                user_db.rol,
+            )
+        finally:
+            db.close()
+
+    # ✔️ coincide con use case
     def find_by_email(self, email: str):
-        session = self.SessionLocal()
-        user_db = session.query(UserTable).filter(UserTable.email == email).first()
-        session.close()
-        if user_db:
-            return DomainUser(user_db.id_usuario, user_db.email, user_db.password, user_db.rol)
-        return None
+        db = self.SessionLocal()
+        try:
+            user = db.query(UserORM).filter(UserORM.email == email).first()
+
+            if not user:
+                return None
+
+            return DomainUser(
+                user.id,
+                user.email,
+                user.password,
+                user.rol,
+            )
+        finally:
+            db.close()

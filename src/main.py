@@ -1,13 +1,20 @@
 import sys
 import os
-
+print("🔥 MAIN EJECUTÁNDOSE")
 sys.path.insert(0, os.path.dirname(__file__))
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-
+# import rutas de la IA
 from infrastructure.frameworks.fastapi.ia_lab_router import router as ia_lab_router
+# importando ruta de auth
+from infrastructure.frameworks.fastapi.auth_router import router as auth_router
+# importando ruta /
+from infrastructure.frameworks.fastapi.root_router import router as root_router
+# importando ruta de health
+from infrastructure.frameworks.fastapi.health_router import router as health_router
+
 
 from pydantic import BaseModel, EmailStr
 from infrastructure.adapters.output.mysql_user_repository import MySQLUserRepository
@@ -26,16 +33,6 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
-
-# --- .INICIALIZACIÓN DE COMPONENTES ---
-user_repo = MySQLUserRepository()
-auth_service = AuthUseCase(user_repo)
-
-# --- .DTOs (Data Transfer Objects) ---
-class UserAuth(BaseModel):
-    email: EmailStr
-    password: str
-    rol: str = "estudiante"
 
 # ── CORS ──────────────────────────────────────────────────────────────────────
 # allow_origins=["*"] es seguro aquí porque no se usan cookies ni credenciales.
@@ -61,12 +58,9 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 
 # ── Rutas ─────────────────────────────────────────────────────────────────────
 app.include_router(ia_lab_router)
-
-
-@app.get("/health", tags=["Health"])
-def health_check():
-    return {"status": "ok", "service": "ia-lab"}
-
+app.include_router(auth_router)
+app.include_router(root_router)
+app.include_router(health_router)
 
 # =================================================
 #roles
@@ -85,36 +79,36 @@ class LoginRequest(BaseModel):
     email: EmailStr
     password: str
 
-# ── .Rutas de Autenticación ────────────────────────────────────────────────────
+# # ── .Rutas de Autenticación ────────────────────────────────────────────────────
 
 
-@app.post("/register", tags=["Auth"], status_code=status.HTTP_201_CREATED)
-def register(user_data: RegisterRequest):
-    try:
-        return auth_service.register(user_data.email, user_data.password, user_data.rol)
-    except Exception as e:
+# @app.post("/register", tags=["Auth"], status_code=status.HTTP_201_CREATED)
+# def register(user_data: RegisterRequest):
+#     try:
+#         return auth_service.register(user_data.email, user_data.password, user_data.rol)
+#     except Exception as e:
         
-        error_msg = str(e)
-        if "Duplicate entry" in error_msg:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, 
-                detail="Este correo electrónico ya está registrado."
-            )
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
-            detail="No se pudo completar el registro. Inténtalo más tarde."
-        )
+#         error_msg = str(e)
+#         if "Duplicate entry" in error_msg:
+#             raise HTTPException(
+#                 status_code=status.HTTP_400_BAD_REQUEST, 
+#                 detail="Este correo electrónico ya está registrado."
+#             )
+#         raise HTTPException(
+#             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+#             detail="No se pudo completar el registro. Inténtalo más tarde."
+#         )
 
-@app.post("/login", tags=["Auth"])
-def login(user_data: LoginRequest):
-    result = auth_service.login(user_data.email, user_data.password)
+# @app.post("/login", tags=["Auth"])
+# def login(user_data: LoginRequest):
+#     result = auth_service.login(user_data.email, user_data.password)
     
-    if not result:
+#     if not result:
         
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Correo o contraseña incorrectos.",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+#         raise HTTPException(
+#             status_code=status.HTTP_401_UNAUTHORIZED,
+#             detail="Correo o contraseña incorrectos.",
+#             headers={"WWW-Authenticate": "Bearer"},
+#         )
     
-    return result
+#     return result

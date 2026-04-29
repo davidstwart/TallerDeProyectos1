@@ -1,8 +1,6 @@
-from dataclasses import dataclass
-
-@dataclass
 class User:
-    id_usuario: int | None
-    email: str
-    password: str
-    rol: str = "estudiante"
+    def __init__(self, id, email, password, rol):
+        self.id = id
+        self.email = email
+        self.password = password
+        self.rol = rol
