@@ -12,7 +12,7 @@ Base = declarative_base()
 class UserORM(Base):
     __tablename__ = "usuario"
 
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column("id_usuario", Integer, primary_key=True, index=True)
     email = Column(String(100), unique=True, index=True)
     password = Column(String(255))
     rol = Column(String(50))

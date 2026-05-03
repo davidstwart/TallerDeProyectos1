@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String
+""" from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.orm import sessionmaker, declarative_base
 from domain.models.user import User as DomainUser
 
@@ -69,4 +69,4 @@ class MySQLUserRepository:
             )
 
         finally:
-            session.close()
+            session.close() """

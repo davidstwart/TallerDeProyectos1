@@ -1,4 +1,3 @@
-# src/application/ports/output/user_repository.py
 from abc import ABC, abstractmethod
 from domain.models.user import User
 
