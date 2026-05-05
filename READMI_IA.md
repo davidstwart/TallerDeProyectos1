@@ -37,7 +37,6 @@ cd TallerDeProyectos1
 ## CONFIGURAR EL ENTORNO VIRTUAL
 
 ```bash
-cd ./src/
 py -3.11 -m venv venv
 venv\Scripts\activate
 ```
@@ -47,7 +46,6 @@ venv\Scripts\activate
 ## INSTALAR DEPENDENCIAS
 
 ```bash
-pip install --upgrade pip
 python.exe -m pip install --upgrade pip
 
 
@@ -57,14 +55,7 @@ pip install -r requirements.txt
 ### requirements.txt
 
 ```txt
-fastapi>=0.100.0,<1.0.0
-uvicorn[standard]>=0.23.0,<1.0.0
-pandas>=2.0.0,<3.0.0
-scikit-learn>=1.3.0,<2.0.0
-numpy>=1.24.0,<2.0.0
-python-multipart>=0.0.6
-pydantic>=2.0.0,<3.0.0
-joblib>=1.3.0,<2.0.0
+hay un monton
 ```
 
 ---
@@ -72,7 +63,6 @@ joblib>=1.3.0,<2.0.0
 ## LEVANTAR EL SERVICIO
 
 ```bash
-cd src
 python -m uvicorn main:app --reload --host localhost --port 8000
 ```
 
