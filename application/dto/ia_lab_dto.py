@@ -13,8 +13,20 @@ ModelName = Literal[
 # ── Request DTOs ──────────────────────────────────────────────────────────────
 
 class GenerateDatasetRequest(BaseModel):
-    n_samples: int = Field(default=500, ge=100, le=2000,
-                           description="Número de estudiantes a generar")
+
+    n_samples: int = Field(
+        default=500,
+        ge=100,
+        le=2000,
+        description=
+            "Número de estudiantes a generar"
+    )
+
+    dataset_type: str = Field(
+        default="rendimiento",
+        description=
+            "Tipo de dataset simulado"
+    )
 
 
 class TrainModelRequest(BaseModel):

@@ -12,7 +12,7 @@ from application.dto.ia_lab_dto import (
     UploadCSVResponse,
 )
 from application.useCases.ia_lab_use_case import IALabUseCase
-from infrastructure.adapters.output.session_repository import InMemorySessionRepository
+from infrastructure.adapters.output.repositories.session_repository import InMemorySessionRepository
 
 # ── Dependency injection (singleton in-memory repo) ───────────────────────────
 # Un único repositorio compartido por todos los requests del mismo proceso.
@@ -55,7 +55,10 @@ def generate_dataset(
 ):
     """Genera un dataset sintético y retorna su `session_id` junto con
     la información exploratoria. Usa el `session_id` en las siguientes llamadas."""
-    session_id, info = uc.generate_simulated_dataset(body.n_samples)
+    session_id, info = uc.generate_simulated_dataset(
+        body.n_samples,
+        body.dataset_type
+    )
     return DatasetInfoResponse(
         session_id=session_id,
         total_records=info.total_records,

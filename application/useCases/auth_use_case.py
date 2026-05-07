@@ -1,37 +1,80 @@
-from passlib.context import CryptContext
-from jose import jwt
-from datetime import datetime, timedelta
-from domain.models.user import User
+from infrastructure.security.password_manager import (
+    verify_password
+)
 
-# Configuración JWT
-SECRET_KEY = "mi_llave_secreta_super_segura"
-ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 
+from infrastructure.security.jwt_manager import (
+    create_access_token
+)
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+from application.ports.input.auth_input_port import (
+    IAuthInputPort
+)
 
-class AuthUseCase:
-    def __init__(self, repository):
-        self.repository = repository
 
-    def create_access_token(self, data: dict):
-        to_encode = data.copy()
-        expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        to_encode.update({"exp": expire})
-        return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+class AuthUseCase(IAuthInputPort):
 
-    def register(self, email, password, rol):
-        hashed = pwd_context.hash(password)
-        new_user = User(None, email, hashed, rol)
-        user_saved = self.repository.save(new_user)
-        
-        # Generar token inmediatamente
-        token = self.create_access_token({"sub": user_saved.email, "rol": user_saved.rol})
-        return {"access_token": token, "token_type": "bearer", "user": {"email": user_saved.email, "rol": user_saved.rol}}
+    def __init__(
+        self,
+        auth_repository,
+        usuario_repository
+    ):
 
-    def login(self, email, password):
-        user = self.repository.find_by_email(email)
-        if user and pwd_context.verify(password, user.password):
-            token = self.create_access_token({"sub": user.email, "rol": user.rol})
-            return {"access_token": token, "token_type": "bearer", "user": {"email": user.email, "rol": user.rol}}
-        return None
+        self.auth_repository = auth_repository
+
+        self.usuario_repository = (
+            usuario_repository
+        )
+
+    def login(self, data):
+
+        user = (
+            self.usuario_repository.find_by_email(
+                data.correo
+            )
+        )
+
+        if not user:
+            raise Exception(
+                "Usuario no encontrado"
+            )
+
+        valid_password = verify_password(
+            data.password,
+            user.password
+        )
+
+        if not valid_password:
+            raise Exception(
+                "Contraseña incorrecta"
+            )
+
+        access_token = create_access_token({
+            "sub": user.correo,
+            "rol": user.id_rol,
+            "id_usuario": user.id_usuario
+        })
+
+        return {
+            "access_token": access_token,
+            "token_type": "bearer",
+
+            "user": {
+                "id_usuario": user.id_usuario,
+                "nombres": user.nombres,
+                "apellidos": user.apellidos,
+                "correo": user.correo,
+                "id_rol": user.id_rol
+            }
+        }
+
+    def recover_password(self, data):
+
+        return {
+            "message": "Correo enviado"
+        }
+
+    def reset_password(self, data):
+
+        return {
+            "message": "Password actualizado"
+        }

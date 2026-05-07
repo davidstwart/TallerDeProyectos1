@@ -1,99 +1,229 @@
-import { Link, useNavigate } from "react-router-dom";
-import "../App.css";
+import {
+  Link,
+  useNavigate,
+} from "react-router-dom";
+
+import {
+  useState,
+} from "react";
+
+import {
+  loginRequest,
+} from "../services/authService";
+
+import {
+  useAuth,
+} from "../context/AuthContext";
+
+import "../estilos/auth.css";
 
 function Login() {
-  const navigate = useNavigate();
 
-  const iniciarSesion = (e) => {
+  const navigate =
+    useNavigate();
+
+  const { login } =
+    useAuth();
+
+  const [formData, setFormData] =
+    useState({
+      correo: "",
+      password: "",
+    });
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  const handleChange = (e) => {
+
+    setFormData({
+      ...formData,
+      [e.target.name]:
+        e.target.value,
+    });
+  };
+
+  const iniciarSesion = async (
+    e
+  ) => {
+
     e.preventDefault();
 
-    // Más adelante aquí irá la validación real del usuario.
-    navigate("/laboratorio");
+    setError("");
+
+    try {
+
+      setLoading(true);
+
+      const response =
+        await loginRequest(
+          formData
+        );
+
+      login(
+        response.access_token,
+        response.user
+      );
+
+      // =================================
+      // REDIRECCIÓN POR ROL
+      // =================================
+
+      const rol =
+        response.user.id_rol;
+
+      if (rol === 1) {
+
+        navigate("/admin");
+
+      } else if (rol === 2) {
+
+        navigate("/docente");
+
+      } else {
+
+        navigate("/progreso");
+      }
+
+    } catch (error) {
+
+      console.error(error);
+
+      setError(
+        "Correo o contraseña incorrectos"
+      );
+
+    } finally {
+
+      setLoading(false);
+    }
   };
 
   return (
+
     <div className="login-page">
+
       <div className="login-container">
+
         <section className="login-info">
+
           <div className="login-brand">
-            <div className="login-logo">IA</div>
+
+            <div className="login-logo">
+              IA
+            </div>
+
             <span>EDU IA</span>
           </div>
 
-          <h1>Bienvenido de nuevo</h1>
+          <h1>
+            Bienvenido de nuevo
+          </h1>
 
           <p>
-            Inicia sesión para acceder a tus cursos, evaluaciones, laboratorio
-            de inteligencia artificial, progreso académico e insignias.
+            Inicia sesión para acceder
+            a cursos, laboratorio IA,
+            progreso académico y
+            modelos entrenados.
           </p>
 
-          <div className="login-benefits">
-            <div>
-              <span>📚</span>
-              <p>Cursos interactivos</p>
-            </div>
-
-            <div>
-              <span>🧪</span>
-              <p>Laboratorio IA</p>
-            </div>
-
-            <div>
-              <span>📈</span>
-              <p>Seguimiento de progreso</p>
-            </div>
-          </div>
         </section>
 
         <section className="login-card">
-          <Link to="/" className="login-back">
+
+          <Link
+            to="/"
+            className="login-back"
+          >
             ← Volver al inicio
           </Link>
 
-          <h2>Iniciar sesión</h2>
+          <h2>
+            Iniciar sesión
+          </h2>
 
           <p className="login-subtitle">
-            Ingresa tus datos para continuar en la plataforma.
+            Ingresa tus credenciales.
           </p>
 
-          <form className="login-form" onSubmit={iniciarSesion}>
+          {
+            error && (
+              <div className="form-error">
+                {error}
+              </div>
+            )
+          }
+
+          <form
+            className="login-form"
+            onSubmit={iniciarSesion}
+          >
+
             <div className="form-group">
-              <label>Correo electrónico</label>
+
+              <label>
+                Correo electrónico
+              </label>
+
               <input
                 type="email"
+                name="correo"
+                value={formData.correo}
+                onChange={handleChange}
                 placeholder="ejemplo@correo.com"
                 required
               />
             </div>
 
             <div className="form-group">
-              <label>Contraseña</label>
+
+              <label>
+                Contraseña
+              </label>
+
               <input
                 type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
                 placeholder="Ingresa tu contraseña"
                 required
               />
             </div>
 
-            <div className="login-options">
-              <label className="remember">
-                <input type="checkbox" />
-                <span>Recordarme</span>
-              </label>
+            <button
+              type="submit"
+              className="login-submit"
+              disabled={loading}
+            >
 
-              <a href="#">¿Olvidaste tu contraseña?</a>
-            </div>
+              {
+                loading
+                  ? "Ingresando..."
+                  : "Ingresar"
+              }
 
-            <button type="submit" className="login-submit">
-              Ingresar
             </button>
+
           </form>
 
           <p className="login-register">
-            ¿No tienes cuenta? <Link to="/registro">Regístrate aquí</Link>
+
+            ¿No tienes cuenta?
+
+            <Link to="/registro">
+              Regístrate aquí
+            </Link>
+
           </p>
+
         </section>
+
       </div>
+
     </div>
   );
 }

@@ -1,79 +1,43 @@
-from fastapi import APIRouter, HTTPException, status, Depends
-from pydantic import BaseModel, EmailStr
-from enum import Enum
+from fastapi import APIRouter, Depends
 
-from infrastructure.adapters.output.mysql_user_repository import MySQLUserRepository
-from application.useCases.auth_use_case import AuthUseCase
+from application.dto.auth_dto import (
+    LoginDTO,
+    RecoverPasswordDTO,
+    ResetPasswordDTO
+)
 
-router = APIRouter(prefix="/api/v1/auth", tags=["Auth"])
+from infrastructure.frameworks.fastapi.dependencies.auth_dependencies import (
+    get_auth_use_case
+)
 
-
-# ── Roles ─────────────────────────────────────────────
-class UserRole(str, Enum):
-    estudiante = "estudiante"
-    profesor = "profesor"
-
-
-# ── DTOs ──────────────────────────────────────────────
-class RegisterRequest(BaseModel):
-    email: EmailStr
-    password: str
-    rol: UserRole = UserRole.estudiante
-
-
-class LoginRequest(BaseModel):
-    email: EmailStr
-    password: str
-
-
-# ── Dependency ────────────────────────────────────────
-def get_auth_service():
-    try:
-        repo = MySQLUserRepository()
-        return AuthUseCase(repo)
-    except Exception as e:
-        print("MYSQL ERROR:", e)
-        raise HTTPException(status_code=500, detail="DB no disponible")
-
-
-# ── ENDPOINTS ─────────────────────────────────────────
-
-@router.post("/register", status_code=status.HTTP_201_CREATED)
-def register(
-    user_data: RegisterRequest,
-    service: AuthUseCase = Depends(get_auth_service),
-):
-    try:
-        return service.register(
-            user_data.email,
-            user_data.password,
-            user_data.rol,
-        )
-    except Exception as e:
-        if "Duplicate entry" in str(e):
-            raise HTTPException(
-                status_code=400,
-                detail="Correo ya registrado",
-            )
-        raise HTTPException(status_code=500, detail="Error en registro")
+router = APIRouter(
+    prefix="/auth",
+    tags=["Auth"]
+)
 
 
 @router.post("/login")
 def login(
-    user_data: LoginRequest,
-    service: AuthUseCase = Depends(get_auth_service),
+    data: LoginDTO,
+    use_case=Depends(get_auth_use_case)
 ):
-    result = service.login(user_data.email, user_data.password)
 
-    if not result:
-        raise HTTPException(
-            status_code=401,
-            detail="Credenciales incorrectas",
-        )
-
-    return result
+    return use_case.login(data)
 
 
-@router.get("/test")
-def test():
-    return {"msg": "auth funcionando"}
+@router.post("/recover")
+def recover_password(
+    data: RecoverPasswordDTO,
+    use_case=Depends(get_auth_use_case)
+):
+
+    return use_case.recover_password(data)
+
+
+@router.post("/reset")
+def reset_password(
+    data: ResetPasswordDTO,
+    use_case=Depends(get_auth_use_case)
+):
+
+    return use_case.reset_password(data)

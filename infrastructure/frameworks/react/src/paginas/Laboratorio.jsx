@@ -1,174 +1,1044 @@
+import Layout from "../components/layout/Layout";
+import {
+  useEffect,
+  useState
+} from "react";
+
 import "../estilos/pages.css";
 
+import {
+  getModelsRequest,
+  uploadCSVRequest,
+  getDatasetInfoRequest,
+  trainModelRequest,
+} from "../services/iaLabService";
+
 function Laboratorio() {
+
+  // =========================================
+  // STATES
+  // =========================================
+
+  const [file, setFile] =
+    useState(null);
+
+  const [sessionId, setSessionId] =
+    useState("");
+
+  const [datasetInfo, setDatasetInfo] =
+    useState(null);
+
+  const [models, setModels] =
+    useState([]);
+
+  const [selectedModel, setSelectedModel] =
+    useState("");
+
+  const [targetColumn, setTargetColumn] =
+    useState("aprobado");
+
+  const [trainingResult, setTrainingResult] =
+    useState(null);
+
+  const [predictionInputs, setPredictionInputs] =
+  useState({});
+
+  const [predictionResult, setPredictionResult] =
+    useState(null);
+
+  const [loadingPrediction, setLoadingPrediction] =
+    useState(false);
+
+  const [loadingUpload, setLoadingUpload] =
+    useState(false);
+
+  const [loadingTrain, setLoadingTrain] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  // =========================================
+  // LOAD MODELS
+  // =========================================
+
+  useEffect(() => {
+
+    const loadModels = async () => {
+
+      try {
+
+        const response =
+          await getModelsRequest();
+
+        setModels(
+          response.models
+        );
+
+        if (
+          response.models.length > 0
+        ) {
+
+          setSelectedModel(
+            response.models[0].name
+          );
+        }
+
+      } catch (error) {
+
+        console.error(error);
+
+        setError(
+          "Error cargando modelos"
+        );
+      }
+    };
+
+    loadModels();
+
+  }, []);
+
+  // =========================================
+  // FILE CHANGE
+  // =========================================
+
+  const handleFileChange = (
+    e
+  ) => {
+
+    const selectedFile =
+      e.target.files[0];
+
+    if (!selectedFile) return;
+
+    setFile(selectedFile);
+  };
+
+  // =========================================
+  // UPLOAD DATASET
+  // =========================================
+
+  const handleUpload =
+    async () => {
+
+      if (!file) {
+
+        setError(
+          "Selecciona un archivo CSV"
+        );
+
+        return;
+      }
+
+      try {
+
+        setLoadingUpload(true);
+
+        setError("");
+
+        const response =
+          await uploadCSVRequest(
+            file,
+            targetColumn
+          );
+
+        setSessionId(
+          response.session_id
+        );
+
+        const datasetResponse =
+          await getDatasetInfoRequest(
+            response.session_id,
+            targetColumn
+          );
+
+        setDatasetInfo(
+          datasetResponse
+        );
+
+      } catch (error) {
+
+        console.error(error);
+
+        setError(
+          error.response?.data?.detail ||
+          "Error subiendo dataset"
+        );
+
+      } finally {
+
+        setLoadingUpload(false);
+      }
+    };
+
+  // =========================================
+  // TRAIN MODEL
+  // =========================================
+
+  const handleTrain =
+    async () => {
+
+      if (!sessionId) {
+
+        setError(
+          "Debes subir un dataset"
+        );
+
+        return;
+      }
+
+      try {
+
+        setLoadingTrain(true);
+
+        setError("");
+
+        const response =
+          await trainModelRequest({
+            session_id: sessionId,
+            model_name: selectedModel,
+            params: {},
+            test_size: 0.2,
+          });
+
+        setTrainingResult(
+          response
+        );
+
+      } catch (error) {
+
+        console.error(error);
+
+        setError(
+          error.response?.data?.detail ||
+          "Error entrenando modelo"
+        );
+
+      } finally {
+
+        setLoadingTrain(false);
+      }
+    };
+
+
+  // =========================================
+  // HANDLE PREDICTION INPUT
+  // =========================================
+
+  const handlePredictionInput = (
+    feature,
+    value
+  ) => {
+
+    setPredictionInputs((prev) => ({
+
+      ...prev,
+
+      [feature]: Number(value),
+
+    }));
+  };
+
+  // =========================================
+  // PREDICT
+  // =========================================
+
+  const handlePredict =
+    async () => {
+
+      try {
+
+        setLoadingPrediction(true);
+
+        const response =
+          // eslint-disable-next-line no-undef
+          await predictRequest({
+
+            session_id: sessionId,
+
+            features:
+              predictionInputs,
+
+          });
+
+        setPredictionResult(
+          response
+        );
+
+      } catch (error) {
+
+        console.error(error);
+
+        setError(
+          error.response?.data?.detail ||
+          "Error realizando predicción"
+        );
+
+      } finally {
+
+        setLoadingPrediction(false);
+      }
+    };
+
+
+    
+
   return (
+
+  <Layout>
+
     <div className="lab-page">
+
+      {/* =====================================
+          HEADER
+      ====================================== */}
+
       <header className="lab-header">
+
         <div>
-          <span className="lab-badge">Laboratorio IA</span>
-          <h1>Entrena un modelo con tu propio dataset</h1>
+
+          <span className="lab-badge">
+            Laboratorio IA
+          </span>
+
+          <h1>
+            Entrena modelos reales
+            de Machine Learning
+          </h1>
+
           <p>
-            Sube un archivo de datos, selecciona una variable objetivo y simula
-            el entrenamiento de un modelo de inteligencia artificial.
+            Sube datasets CSV,
+            analiza estadísticas,
+            entrena modelos sklearn
+            y realiza predicciones
+            académicas reales.
           </p>
+
         </div>
+
       </header>
 
+      {/* =====================================
+          ERROR
+      ====================================== */}
+
+      {
+        error && (
+
+          <div
+            className="lab-card"
+            style={{
+              marginBottom: "24px",
+              border:
+                "1px solid rgba(239,68,68,.4)",
+            }}
+          >
+
+            <p
+              style={{
+                color: "#fca5a5",
+              }}
+            >
+              {error}
+            </p>
+
+          </div>
+        )
+      }
+
+      {/* =====================================
+          MAIN
+      ====================================== */}
+
       <main className="lab-layout">
-        <section className="lab-card upload-card">
+
+        {/* =====================================
+            UPLOAD
+        ====================================== */}
+
+        <section className="lab-card">
+
           <div className="card-title">
+
             <span>01</span>
+
             <div>
-              <h2>Subir dataset</h2>
-              <p>Formatos permitidos: CSV o Excel.</p>
+
+              <h2>
+                Subir dataset
+              </h2>
+
+              <p>
+                Carga datasets CSV
+                educativos para entrenar
+                modelos predictivos.
+              </p>
+
             </div>
+
           </div>
 
           <label className="upload-box">
-            <input type="file" accept=".csv,.xlsx" />
-            <div className="upload-icon">📁</div>
-            <h3>Selecciona o arrastra tu archivo</h3>
-            <p>Ejemplo: estudiantes.csv, ventas.xlsx, datos_ia.csv</p>
+
+            <input
+              type="file"
+              accept=".csv"
+              onChange={
+                handleFileChange
+              }
+            />
+
+            <div className="upload-icon">
+              📁
+            </div>
+
+            <h3>
+
+              {
+                file
+                  ? file.name
+                  : "Selecciona tu dataset"
+              }
+
+            </h3>
+
+            <p>
+              Formato soportado:
+              CSV
+            </p>
+
           </label>
+
+          <button
+            className="train-btn"
+            onClick={
+              handleUpload
+            }
+            disabled={
+              loadingUpload
+            }
+            style={{
+              marginTop: "18px",
+            }}
+          >
+
+            {
+              loadingUpload
+                ? "Subiendo..."
+                : "Subir Dataset"
+            }
+
+          </button>
+
         </section>
 
+        {/* =====================================
+            CONFIG
+        ====================================== */}
+
         <section className="lab-card config-card">
+
           <div className="card-title">
+
             <span>02</span>
+
             <div>
-              <h2>Configurar entrenamiento</h2>
-              <p>Elige cómo se entrenará el modelo.</p>
+
+              <h2>
+                Configurar entrenamiento
+              </h2>
+
+              <p>
+                Selecciona el modelo
+                de IA y configura
+                el entrenamiento.
+              </p>
+
             </div>
+
           </div>
 
           <div className="form-grid">
-            <div className="lab-form-group">
-              <label>Variable objetivo</label>
-              <select>
-                <option>Seleccionar columna</option>
-                <option>Aprobado</option>
-                <option>Nota final</option>
-                <option>Categoría</option>
-              </select>
-            </div>
+
+            {
+              datasetInfo && (
+
+                <div className="lab-form-group">
+
+                  <label>
+                    Variable objetivo
+                  </label>
+
+                  <select
+                    value={
+                      targetColumn
+                    }
+                    onChange={(e) =>
+                      setTargetColumn(
+                        e.target.value
+                      )
+                    }
+                  >
+
+                    {
+                      datasetInfo.feature_names
+                        ?.map((col) => (
+
+                          <option
+                            key={col}
+                            value={col}
+                          >
+                            {col}
+                          </option>
+                        ))
+                    }
+
+                  </select>
+
+                </div>
+              )
+            }
 
             <div className="lab-form-group">
-              <label>Tipo de problema</label>
-              <select>
-                <option>Clasificación</option>
-                <option>Predicción numérica</option>
+
+              <label>
+                Modelo IA
+              </label>
+
+              <select
+                value={
+                  selectedModel
+                }
+                onChange={(e) =>
+                  setSelectedModel(
+                    e.target.value
+                  )
+                }
+              >
+
+                {
+                  models.map(
+                    (model) => (
+
+                      <option
+                        key={
+                          model.name
+                        }
+                        value={
+                          model.name
+                        }
+                      >
+                        {model.name}
+                      </option>
+                    )
+                  )
+                }
+
               </select>
+
             </div>
 
-            <div className="lab-form-group">
-              <label>Algoritmo</label>
-              <select>
-                <option>Árbol de decisión</option>
-                <option>Random Forest</option>
-                <option>Regresión logística</option>
-              </select>
-            </div>
-
-            <div className="lab-form-group">
-              <label>División de datos</label>
-              <select>
-                <option>80% entrenamiento / 20% prueba</option>
-                <option>70% entrenamiento / 30% prueba</option>
-                <option>60% entrenamiento / 40% prueba</option>
-              </select>
-            </div>
           </div>
 
-          <button className="train-btn">Iniciar entrenamiento</button>
+          <button
+            className="train-btn"
+            onClick={
+              handleTrain
+            }
+            disabled={
+              loadingTrain
+            }
+          >
+
+            {
+              loadingTrain
+                ? "Entrenando..."
+                : "Entrenar Modelo"
+            }
+
+          </button>
+
         </section>
 
-        <section className="lab-card preview-card">
-          <div className="card-title">
-            <span>03</span>
-            <div>
-              <h2>Vista previa del dataset</h2>
-              <p>Primeras filas del archivo cargado.</p>
-            </div>
-          </div>
+        {/* =====================================
+            DATASET INFO
+        ====================================== */}
 
-          <div className="table-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Edad</th>
-                  <th>Horas estudio</th>
-                  <th>Nota</th>
-                  <th>Aprobado</th>
-                </tr>
-              </thead>
+        {
+          datasetInfo && (
 
-              <tbody>
-                <tr>
-                  <td>15</td>
-                  <td>4</td>
-                  <td>16</td>
-                  <td>Sí</td>
-                </tr>
-                <tr>
-                  <td>16</td>
-                  <td>2</td>
-                  <td>12</td>
-                  <td>Sí</td>
-                </tr>
-                <tr>
-                  <td>15</td>
-                  <td>1</td>
-                  <td>09</td>
-                  <td>No</td>
-                </tr>
-                <tr>
-                  <td>17</td>
-                  <td>5</td>
-                  <td>18</td>
-                  <td>Sí</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </section>
+            <section className="lab-card">
 
-        <section className="lab-card results-card">
-          <div className="card-title">
-            <span>04</span>
-            <div>
-              <h2>Resultados del modelo</h2>
-              <p>Resultados simulados del entrenamiento.</p>
-            </div>
-          </div>
+              <div className="card-title">
 
-          <div className="metrics-grid">
-            <div className="metric">
-              <strong>89%</strong>
-              <span>Accuracy</span>
-            </div>
+                <span>03</span>
 
-            <div className="metric">
-              <strong>85%</strong>
-              <span>Precisión</span>
-            </div>
+                <div>
 
-            <div className="metric">
-              <strong>87%</strong>
-              <span>Recall</span>
-            </div>
-          </div>
+                  <h2>
+                    Información del dataset
+                  </h2>
 
-          <div className="result-message">
-            <span>✅</span>
-            <p>
-              Modelo entrenado correctamente. El sistema identificó patrones en
-              el dataset cargado.
-            </p>
-          </div>
-        </section>
+                  <p>
+                    Vista previa y
+                    análisis básico.
+                  </p>
+
+                </div>
+
+              </div>
+
+              <div
+                className="metrics-grid"
+                style={{
+                  marginBottom: "20px",
+                }}
+              >
+
+                <div className="metric">
+
+                  <strong>
+                    {
+                      datasetInfo.total_records
+                    }
+                  </strong>
+
+                  <span>
+                    Registros
+                  </span>
+
+                </div>
+
+                <div className="metric">
+
+                  <strong>
+                    {
+                      datasetInfo.total_features
+                    }
+                  </strong>
+
+                  <span>
+                    Variables
+                  </span>
+
+                </div>
+
+                <div className="metric">
+
+                  <strong>
+                    {
+                      Object.keys(
+                        datasetInfo.target_classes || {}
+                      ).length
+                    }
+                  </strong>
+
+                  <span>
+                    Clases
+                  </span>
+
+                </div>
+
+              </div>
+
+              <div className="table-wrapper">
+
+                <table>
+
+                  <thead>
+
+                    <tr>
+
+                      {
+                        Object.keys(
+                          datasetInfo.preview[0]
+                        ).map((col) => (
+
+                          <th key={col}>
+                            {col}
+                          </th>
+                        ))
+                      }
+
+                    </tr>
+
+                  </thead>
+
+                  <tbody>
+
+                    {
+                      datasetInfo.preview.map(
+                        (
+                          row,
+                          index
+                        ) => (
+
+                          <tr key={index}>
+
+                            {
+                              Object.values(
+                                row
+                              ).map(
+                                (
+                                  value,
+                                  i
+                                ) => (
+
+                                  <td key={i}>
+                                    {
+                                      value
+                                    }
+                                  </td>
+                                )
+                              )
+                            }
+
+                          </tr>
+                        )
+                      )
+                    }
+
+                  </tbody>
+
+                </table>
+
+              </div>
+
+            </section>
+          )
+        }
+
+        {/* =====================================
+            RESULTS
+        ====================================== */}
+
+        {
+          trainingResult && (
+
+            <section className="lab-card">
+
+              <div className="card-title">
+
+                <span>04</span>
+
+                <div>
+
+                  <h2>
+                    Resultados del modelo
+                  </h2>
+
+                  <p>
+                    Métricas generadas
+                    por sklearn.
+                  </p>
+
+                </div>
+
+              </div>
+
+              <div className="metrics-grid">
+
+                <div className="metric">
+
+                  <strong>
+
+                    {
+                      (
+                        trainingResult.accuracy * 100
+                      ).toFixed(2)
+                    }%
+
+                  </strong>
+
+                  <span>
+                    Accuracy
+                  </span>
+
+                </div>
+
+                <div className="metric">
+
+                  <strong>
+
+                    {
+                      (
+                        trainingResult.precision * 100
+                      ).toFixed(2)
+                    }%
+
+                  </strong>
+
+                  <span>
+                    Precision
+                  </span>
+
+                </div>
+
+                <div className="metric">
+
+                  <strong>
+
+                    {
+                      (
+                        trainingResult.recall * 100
+                      ).toFixed(2)
+                    }%
+
+                  </strong>
+
+                  <span>
+                    Recall
+                  </span>
+
+                </div>
+
+              </div>
+
+              <div
+                className="metrics-grid"
+                style={{
+                  marginTop: "16px",
+                }}
+              >
+
+                <div className="metric">
+
+                  <strong>
+
+                    {
+                      (
+                        trainingResult.f1_score * 100
+                      ).toFixed(2)
+                    }%
+
+                  </strong>
+
+                  <span>
+                    F1 Score
+                  </span>
+
+                </div>
+
+                <div className="metric">
+
+                  <strong>
+                    {
+                      trainingResult.train_samples
+                    }
+                  </strong>
+
+                  <span>
+                    Train Samples
+                  </span>
+
+                </div>
+
+                <div className="metric">
+
+                  <strong>
+                    {
+                      trainingResult.test_samples
+                    }
+                  </strong>
+
+                  <span>
+                    Test Samples
+                  </span>
+
+                </div>
+
+              </div>
+
+              <div className="result-message">
+
+                <span>✅</span>
+
+                <p>
+
+                  Modelo entrenado
+                  correctamente usando:
+
+                  <strong>
+
+                    {" "}
+                    {
+                      trainingResult.model_name
+                    }
+
+                  </strong>
+
+                </p>
+
+              </div>
+
+            </section>
+          )
+        }
+
+        {
+          trainingResult && (
+
+            <section className="lab-card">
+
+              <div className="card-title">
+
+                <span>05</span>
+
+                <div>
+
+                  <h2>
+                    Realizar predicción
+                  </h2>
+
+                  <p>
+                    Ingresa valores para
+                    obtener predicciones
+                    académicas usando IA.
+                  </p>
+
+                </div>
+
+              </div>
+
+              <div className="form-grid">
+
+                {
+                  trainingResult.feature_names.map(
+                    (feature) => (
+
+                      <div
+                        key={feature}
+                        className="lab-form-group"
+                      >
+
+                        <label>
+                          {feature}
+                        </label>
+
+                        <input
+                          type="number"
+                          step="any"
+                          placeholder={`Valor de ${feature}`}
+                          onChange={(e) =>
+
+                            handlePredictionInput(
+                              feature,
+                              e.target.value
+                            )
+                          }
+                        />
+
+                      </div>
+                    )
+                  )
+                }
+
+              </div>
+
+              <button
+                className="train-btn"
+                onClick={handlePredict}
+                disabled={loadingPrediction}
+              >
+
+                {
+                  loadingPrediction
+                    ? "Prediciendo..."
+                    : "Realizar Predicción"
+                }
+
+              </button>
+
+              {
+                predictionResult && (
+
+                  <div
+                    className="result-message"
+                    style={{
+                      marginTop: "24px",
+                    }}
+                  >
+
+                    <span>🤖</span>
+
+                    <div>
+
+                      <p>
+
+                        Predicción:
+
+                        <strong>
+
+                          {" "}
+                          {
+                            predictionResult.prediction
+                          }
+
+                        </strong>
+
+                      </p>
+
+                      {
+                        predictionResult.probabilities && (
+
+                          <div
+                            style={{
+                              marginTop: "12px",
+                            }}
+                          >
+
+                            {
+                              Object.entries(
+
+                                predictionResult.probabilities
+
+                              ).map(
+
+                                ([key, value]) => (
+
+                                  <p key={key}>
+
+                                    Clase {key}:
+
+                                    {" "}
+
+                                    <strong>
+
+                                      {
+                                        (
+                                          value * 100
+                                        ).toFixed(2)
+                                      }%
+
+                                    </strong>
+
+                                  </p>
+                                )
+                              )
+                            }
+
+                          </div>
+                        )
+                      }
+
+                    </div>
+
+                  </div>
+                )
+              }
+
+            </section>
+          )
+        }
+
       </main>
+
+
+
     </div>
-  );
+
+  </Layout>
+);
 }
 
 export default Laboratorio;

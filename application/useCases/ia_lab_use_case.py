@@ -93,12 +93,67 @@ class IALabUseCase(IIALabInputPort):
 
     # ── Dataset ───────────────────────────────────────────────────────────────
 
-    def generate_simulated_dataset(self, n_samples: int) -> tuple:
-        df = self._build_simulated_df(n_samples)
+    def generate_simulated_dataset(
+        self,
+        n_samples: int,
+        dataset_type: str = "rendimiento"
+    ) -> tuple:
+
+        generators = {
+
+            "rendimiento":
+                self._build_dataset_rendimiento,
+
+            "riesgo":
+                self._build_dataset_riesgo,
+
+            "programacion":
+                self._build_dataset_programacion,
+
+            "asistencia":
+                self._build_dataset_asistencia,
+
+            "becas":
+                self._build_dataset_becas,
+
+            "desercion":
+                self._build_dataset_desercion,
+
+            "matematica":
+                self._build_dataset_matematica,
+
+            "ia":
+                self._build_dataset_ia,
+
+            "redes":
+                self._build_dataset_redes,
+
+            "algoritmos":
+                self._build_dataset_algoritmos,
+        }
+
+        generator = generators.get(
+            dataset_type,
+            self._build_dataset_rendimiento
+        )
+
+        df = generator(n_samples)
+
         session_id = str(uuid.uuid4())
-        self._repo.save_dataframe(session_id, df, "aprobado")
-        info = self._build_dataset_info(df, "aprobado")
+
+        self._repo.save_dataframe(
+            session_id,
+            df,
+            "aprobado"
+        )
+
+        info = self._build_dataset_info(
+            df,
+            "aprobado"
+        )
+
         return session_id, info
+
 
     def upload_csv_dataset(
         self, content: bytes, filename: str, target_column: str = "aprobado"
@@ -272,33 +327,6 @@ class IALabUseCase(IIALabInputPort):
     # ── Helpers ───────────────────────────────────────────────────────────────
 
     @staticmethod
-    def _build_simulated_df(n: int) -> pd.DataFrame:
-        # Usar default_rng en lugar de np.random.seed — thread-safe y reproducible
-        rng = np.random.default_rng(42)
-        data = {
-            "horas_estudio": np.round(rng.uniform(0, 30, n), 1),
-            "asistencia": np.round(rng.uniform(40, 100, n), 1),
-            "promedio_previo": np.round(rng.uniform(5, 20, n), 1),
-            "horas_sueno": np.round(rng.uniform(3, 10, n), 1),
-            "actividades_extra": rng.choice([0, 1], n, p=[0.4, 0.6]),
-            "nivel_socioeconomico": rng.choice([1, 2, 3], n, p=[0.3, 0.5, 0.2]),
-            "acceso_internet": rng.choice([0, 1], n, p=[0.2, 0.8]),
-        }
-        df = pd.DataFrame(data)
-        score = (
-            0.25 * df["horas_estudio"] / 30
-            + 0.20 * df["asistencia"] / 100
-            + 0.25 * df["promedio_previo"] / 20
-            + 0.10 * df["horas_sueno"] / 10
-            + 0.08 * df["actividades_extra"]
-            + 0.07 * df["nivel_socioeconomico"] / 3
-            + 0.05 * df["acceso_internet"]
-        )
-        noise = rng.normal(0, 0.05, n)
-        df["aprobado"] = (score + noise >= 0.55).astype(int)
-        return df
-
-    @staticmethod
     def _build_dataset_info(df: pd.DataFrame, target_column: str) -> DatasetInfo:
         numeric_df = df.select_dtypes(include=[np.number])
         stats = numeric_df.describe().round(4).to_dict()
@@ -353,3 +381,413 @@ class IALabUseCase(IIALabInputPort):
                 metric=params.get("metric", "euclidean"),
             )
         raise ValueError(f"Modelo '{name}' no reconocido.")
+    
+    # ── DATASET 1 ─────────────────────────────────────────────────────────────
+
+    @staticmethod
+    def _build_dataset_rendimiento(n: int):
+
+        rng = np.random.default_rng()
+
+        data = {
+
+            "horas_estudio":
+                np.round(rng.uniform(0, 30, n), 1),
+
+            "asistencia":
+                np.round(rng.uniform(40, 100, n), 1),
+
+            "promedio_previo":
+                np.round(rng.uniform(5, 20, n), 1),
+
+            "participacion":
+                rng.integers(0, 10, n),
+
+            "internet":
+                rng.choice([0, 1], n),
+        }
+
+        df = pd.DataFrame(data)
+
+        score = (
+
+            0.3 * df["horas_estudio"] / 30 +
+
+            0.3 * df["asistencia"] / 100 +
+
+            0.3 * df["promedio_previo"] / 20 +
+
+            0.1 * df["participacion"] / 10
+        )
+
+        noise = rng.normal(0, 0.05, n)
+
+        df["aprobado"] = (
+            score + noise >= 0.6
+        ).astype(int)
+
+        return df
+
+
+    # ── DATASET 2 ─────────────────────────────────────────────────────────────
+
+    @staticmethod
+    def _build_dataset_riesgo(n: int):
+
+        rng = np.random.default_rng()
+
+        data = {
+
+            "inasistencias":
+                rng.integers(0, 40, n),
+
+            "tareas_incompletas":
+                rng.integers(0, 15, n),
+
+            "promedio":
+                np.round(rng.uniform(0, 20, n), 1),
+
+            "participacion":
+                rng.integers(0, 10, n),
+        }
+
+        df = pd.DataFrame(data)
+
+        risk = (
+
+            0.4 * df["inasistencias"] / 40 +
+
+            0.3 * df["tareas_incompletas"] / 15 +
+
+            0.3 * (1 - df["promedio"] / 20)
+        )
+
+        noise = rng.normal(0, 0.05, n)
+
+        df["aprobado"] = (
+            risk + noise < 0.5
+        ).astype(int)
+
+        return df
+
+
+    # ── DATASET 3 ─────────────────────────────────────────────────────────────
+
+    @staticmethod
+    def _build_dataset_programacion(n: int):
+
+        rng = np.random.default_rng()
+
+        data = {
+
+            "errores_codigo":
+                rng.integers(0, 50, n),
+
+            "ejercicios_resueltos":
+                rng.integers(0, 100, n),
+
+            "horas_practica":
+                np.round(rng.uniform(0, 40, n), 1),
+
+            "debugging":
+                rng.integers(0, 10, n),
+        }
+
+        df = pd.DataFrame(data)
+
+        score = (
+
+            0.4 * df["ejercicios_resueltos"] / 100 +
+
+            0.3 * df["horas_practica"] / 40 +
+
+            0.2 * df["debugging"] / 10 +
+
+            0.1 * (1 - df["errores_codigo"] / 50)
+        )
+
+        noise = rng.normal(0, 0.04, n)
+
+        df["aprobado"] = (
+            score + noise >= 0.55
+        ).astype(int)
+
+        return df
+
+
+    # ── DATASET 4 ─────────────────────────────────────────────────────────────
+
+    @staticmethod
+    def _build_dataset_asistencia(n: int):
+
+        rng = np.random.default_rng()
+
+        data = {
+
+            "asistencia":
+                np.round(rng.uniform(30, 100, n), 1),
+
+            "tardanzas":
+                rng.integers(0, 25, n),
+
+            "participacion":
+                rng.integers(0, 10, n),
+        }
+
+        df = pd.DataFrame(data)
+
+        score = (
+
+            0.6 * df["asistencia"] / 100 +
+
+            0.2 * df["participacion"] / 10 +
+
+            0.2 * (1 - df["tardanzas"] / 25)
+        )
+
+        noise = rng.normal(0, 0.05, n)
+
+        df["aprobado"] = (
+            score + noise >= 0.58
+        ).astype(int)
+
+        return df
+
+
+    # ── DATASET 5 ─────────────────────────────────────────────────────────────
+
+    @staticmethod
+    def _build_dataset_becas(n: int):
+
+        rng = np.random.default_rng()
+
+        data = {
+
+            "promedio":
+                np.round(rng.uniform(0, 20, n), 1),
+
+            "ingresos_familiares":
+                np.round(rng.uniform(500, 5000, n), 1),
+
+            "participacion":
+                rng.integers(0, 10, n),
+        }
+
+        df = pd.DataFrame(data)
+
+        score = (
+
+            0.5 * df["promedio"] / 20 +
+
+            0.3 * df["participacion"] / 10 +
+
+            0.2 * (1 - df["ingresos_familiares"] / 5000)
+        )
+
+        noise = rng.normal(0, 0.05, n)
+
+        df["aprobado"] = (
+            score + noise >= 0.6
+        ).astype(int)
+
+        return df
+
+
+    # ── DATASET 6 ─────────────────────────────────────────────────────────────
+
+    @staticmethod
+    def _build_dataset_desercion(n: int):
+
+        rng = np.random.default_rng()
+
+        data = {
+
+            "inasistencias":
+                rng.integers(0, 50, n),
+
+            "promedio":
+                np.round(rng.uniform(0, 20, n), 1),
+
+            "motivacion":
+                rng.integers(0, 10, n),
+        }
+
+        df = pd.DataFrame(data)
+
+        score = (
+
+            0.4 * (1 - df["inasistencias"] / 50) +
+
+            0.4 * df["promedio"] / 20 +
+
+            0.2 * df["motivacion"] / 10
+        )
+
+        noise = rng.normal(0, 0.05, n)
+
+        df["aprobado"] = (
+            score + noise >= 0.5
+        ).astype(int)
+
+        return df
+
+
+    # ── DATASET 7 ─────────────────────────────────────────────────────────────
+
+    @staticmethod
+    def _build_dataset_matematica(n: int):
+
+        rng = np.random.default_rng()
+
+        data = {
+
+            "ejercicios":
+                rng.integers(0, 100, n),
+
+            "horas_estudio":
+                np.round(rng.uniform(0, 20, n), 1),
+
+            "participacion":
+                rng.integers(0, 10, n),
+        }
+
+        df = pd.DataFrame(data)
+
+        score = (
+
+            0.5 * df["ejercicios"] / 100 +
+
+            0.3 * df["horas_estudio"] / 20 +
+
+            0.2 * df["participacion"] / 10
+        )
+
+        noise = rng.normal(0, 0.05, n)
+
+        df["aprobado"] = (
+            score + noise >= 0.55
+        ).astype(int)
+
+        return df
+
+
+    # ── DATASET 8 ─────────────────────────────────────────────────────────────
+
+    @staticmethod
+    def _build_dataset_ia(n: int):
+
+        rng = np.random.default_rng()
+
+        data = {
+
+            "python":
+                rng.integers(0, 10, n),
+
+            "matematica":
+                rng.integers(0, 10, n),
+
+            "datasets":
+                rng.integers(0, 10, n),
+
+            "algoritmos":
+                rng.integers(0, 10, n),
+        }
+
+        df = pd.DataFrame(data)
+
+        score = (
+
+            0.3 * df["python"] / 10 +
+
+            0.3 * df["matematica"] / 10 +
+
+            0.2 * df["datasets"] / 10 +
+
+            0.2 * df["algoritmos"] / 10
+        )
+
+        noise = rng.normal(0, 0.05, n)
+
+        df["aprobado"] = (
+            score + noise >= 0.6
+        ).astype(int)
+
+        return df
+
+
+    # ── DATASET 9 ─────────────────────────────────────────────────────────────
+
+    @staticmethod
+    def _build_dataset_redes(n: int):
+
+        rng = np.random.default_rng()
+
+        data = {
+
+            "practicas":
+                rng.integers(0, 20, n),
+
+            "laboratorios":
+                rng.integers(0, 20, n),
+
+            "topologias":
+                rng.integers(0, 10, n),
+        }
+
+        df = pd.DataFrame(data)
+
+        score = (
+
+            0.4 * df["practicas"] / 20 +
+
+            0.4 * df["laboratorios"] / 20 +
+
+            0.2 * df["topologias"] / 10
+        )
+
+        noise = rng.normal(0, 0.05, n)
+
+        df["aprobado"] = (
+            score + noise >= 0.55
+        ).astype(int)
+
+        return df
+
+
+    # ── DATASET 10 ────────────────────────────────────────────────────────────
+
+    @staticmethod
+    def _build_dataset_algoritmos(n: int):
+
+        rng = np.random.default_rng()
+
+        data = {
+
+            "complejidad":
+                rng.integers(0, 10, n),
+
+            "ejercicios":
+                rng.integers(0, 50, n),
+
+            "logica":
+                rng.integers(0, 10, n),
+        }
+
+        df = pd.DataFrame(data)
+
+        score = (
+
+            0.4 * df["ejercicios"] / 50 +
+
+            0.4 * df["logica"] / 10 +
+
+            0.2 * df["complejidad"] / 10
+        )
+
+        noise = rng.normal(0, 0.05, n)
+
+        df["aprobado"] = (
+            score + noise >= 0.58
+        ).astype(int)
+
+        return df

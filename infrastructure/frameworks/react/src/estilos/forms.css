@@ -1,0 +1,42 @@
+.form-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.form-section {
+  margin-bottom: 24px;
+}
+
+.form-error {
+
+  padding: 14px;
+
+  border-radius: 14px;
+
+  background: var(--danger-bg);
+
+  border:
+    1px solid var(--danger-border);
+
+  color: #fecaca;
+}
+
+.form-success {
+
+  padding: 14px;
+
+  border-radius: 14px;
+
+  background: var(--success-bg);
+
+  border:
+    1px solid var(--success-border);
+
+  color: #dcfce7;
+}

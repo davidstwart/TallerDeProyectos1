@@ -1,0 +1,45 @@
+.table-wrapper {
+  overflow-x: auto;
+}
+
+.table-card {
+
+  border-radius: 24px;
+
+  overflow: hidden;
+
+  border:
+    1px solid rgba(255,255,255,0.08);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+
+  padding: 16px;
+
+  text-align: left;
+}
+
+th {
+
+  background:
+    rgba(15,23,42,0.8);
+
+  color: var(--color-primary);
+}
+
+td {
+
+  background:
+    rgba(15,23,42,0.45);
+
+  color: var(--text-secondary);
+
+  border-bottom:
+    1px solid rgba(255,255,255,0.08);
+}

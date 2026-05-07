@@ -1,0 +1,81 @@
+import axios from "axios";
+
+// ======================================
+// AXIOS INSTANCE
+// ======================================
+
+const API = axios.create({
+
+  baseURL:
+    "http://localhost:8000",
+
+  headers: {
+    "Content-Type":
+      "application/json",
+  },
+});
+
+// ======================================
+// REQUEST INTERCEPTOR
+// ======================================
+
+API.interceptors.request.use(
+
+  (config) => {
+
+    const token =
+      localStorage.getItem(
+        "token"
+      );
+
+    if (token) {
+
+      config.headers.Authorization =
+        `Bearer ${token}`;
+    }
+
+    return config;
+  },
+
+  (error) => {
+
+    return Promise.reject(
+      error
+    );
+  }
+);
+
+// ======================================
+// RESPONSE INTERCEPTOR
+// ======================================
+
+API.interceptors.response.use(
+
+  (response) => response,
+
+  (error) => {
+
+    // TOKEN EXPIRADO
+    if (
+      error.response?.status === 401
+    ) {
+
+      localStorage.removeItem(
+        "token"
+      );
+
+      localStorage.removeItem(
+        "user"
+      );
+
+      window.location.href =
+        "/login";
+    }
+
+    return Promise.reject(
+      error
+    );
+  }
+);
+
+export default API;

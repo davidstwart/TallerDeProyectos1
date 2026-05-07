@@ -1,0 +1,174 @@
+.dashboard-page {
+  display: grid;
+  gap: 32px;
+}
+
+.dashboard-hero {
+  padding: 42px;
+  border-radius: 30px;
+  background:
+    linear-gradient(
+      135deg,
+      rgba(56,189,248,.14),
+      rgba(139,92,246,.14)
+    );
+
+  border: 1px solid rgba(255,255,255,.08);
+}
+
+.dashboard-badge {
+  display: inline-block;
+  margin-bottom: 18px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  color: #7dd3fc;
+  background: rgba(56,189,248,.12);
+  border: 1px solid rgba(56,189,248,.25);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.dashboard-hero h1 {
+  max-width: 720px;
+  margin: 0 0 18px 0;
+  color: white;
+  font-size: 52px;
+  line-height: 1.05;
+}
+
+.dashboard-hero p {
+  max-width: 760px;
+  color: #cbd5e1;
+  font-size: 17px;
+  line-height: 1.7;
+}
+
+.dashboard-stats {
+  display: grid;
+  grid-template-columns:
+    repeat(4, 1fr);
+
+  gap: 18px;
+}
+
+.stat-card {
+  padding: 28px;
+  border-radius: 24px;
+  background:
+    rgba(255,255,255,.06);
+
+  border:
+    1px solid rgba(255,255,255,.08);
+}
+
+.stat-card strong {
+  display: block;
+  margin-bottom: 10px;
+  color: #7dd3fc;
+  font-size: 36px;
+}
+
+.stat-card span {
+  color: #cbd5e1;
+}
+
+.dashboard-section {
+  display: grid;
+  gap: 24px;
+}
+
+.section-header h2 {
+  margin-bottom: 8px;
+  color: white;
+  font-size: 30px;
+}
+
+.section-header p {
+  color: #94a3b8;
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns:
+    repeat(2, 1fr);
+
+  gap: 20px;
+}
+
+.dashboard-card {
+  padding: 30px;
+  border-radius: 28px;
+  background:
+    rgba(255,255,255,.06);
+
+  border:
+    1px solid rgba(255,255,255,.08);
+
+  transition: .25s;
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+
+  border-color:
+    rgba(56,189,248,.4);
+}
+
+.dashboard-icon {
+  width: 70px;
+  height: 70px;
+  margin-bottom: 20px;
+  border-radius: 22px;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(
+      135deg,
+      #38bdf8,
+      #8b5cf6
+    );
+
+  font-size: 32px;
+}
+
+.dashboard-card h3 {
+  margin-bottom: 10px;
+  color: white;
+  font-size: 24px;
+}
+
+.dashboard-card p {
+  color: #cbd5e1;
+  line-height: 1.7;
+}
+
+@media (max-width: 950px) {
+
+  .dashboard-stats {
+    grid-template-columns:
+      repeat(2,1fr);
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-hero h1 {
+    font-size: 40px;
+  }
+}
+
+@media (max-width: 620px) {
+
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-hero {
+    padding: 30px;
+  }
+
+  .dashboard-hero h1 {
+    font-size: 32px;
+  }
+}

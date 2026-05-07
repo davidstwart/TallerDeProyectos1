@@ -1,0 +1,303 @@
+.progress-page {
+  display: grid;
+  gap: 32px;
+}
+
+.progress-hero {
+  padding: 42px;
+  border-radius: 30px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(56,189,248,.14),
+      rgba(139,92,246,.14)
+    );
+
+  border:
+    1px solid rgba(255,255,255,.08);
+}
+
+.progress-badge {
+  display: inline-block;
+
+  margin-bottom: 14px;
+
+  padding: 8px 14px;
+
+  border-radius: 999px;
+
+  color: #7dd3fc;
+
+  background:
+    rgba(56,189,248,.12);
+
+  border:
+    1px solid rgba(56,189,248,.25);
+
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.progress-hero h1 {
+  margin-bottom: 14px;
+
+  color: white;
+  font-size: 52px;
+}
+
+.progress-hero p {
+  max-width: 720px;
+
+  color: #cbd5e1;
+
+  line-height: 1.7;
+}
+
+.progress-metrics {
+  display: grid;
+
+  grid-template-columns:
+    repeat(4,1fr);
+
+  gap: 20px;
+}
+
+.metric-card {
+  padding: 28px;
+
+  border-radius: 24px;
+
+  background:
+    rgba(255,255,255,.05);
+
+  border:
+    1px solid rgba(255,255,255,.08);
+}
+
+.metric-card strong {
+  display: block;
+
+  margin-bottom: 10px;
+
+  color: #7dd3fc;
+
+  font-size: 36px;
+}
+
+.metric-card span {
+  color: #cbd5e1;
+}
+
+.progress-section,
+.recommendation-section {
+  display: grid;
+  gap: 24px;
+}
+
+.progress-list {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3,1fr);
+
+  gap: 20px;
+}
+
+.progress-card {
+  padding: 28px;
+
+  border-radius: 26px;
+
+  background:
+    rgba(255,255,255,.05);
+
+  border:
+    1px solid rgba(255,255,255,.08);
+}
+
+.progress-top {
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  margin-bottom: 22px;
+}
+
+.progress-icon {
+  width: 68px;
+  height: 68px;
+
+  border-radius: 20px;
+
+  display: grid;
+  place-items: center;
+
+  background:
+    linear-gradient(
+      135deg,
+      #38bdf8,
+      #8b5cf6
+    );
+
+  color: white;
+  font-size: 26px;
+  font-weight: 800;
+}
+
+.status {
+  padding: 8px 14px;
+
+  border-radius: 999px;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.status.success {
+  background:
+    rgba(34,197,94,.12);
+
+  color: #4ade80;
+}
+
+.status.warning {
+  background:
+    rgba(234,179,8,.12);
+
+  color: #fde047;
+}
+
+.status.danger {
+  background:
+    rgba(239,68,68,.12);
+
+  color: #f87171;
+}
+
+.progress-card h3 {
+  margin-bottom: 24px;
+
+  color: white;
+  font-size: 26px;
+}
+
+.course-progress {
+  display: grid;
+  gap: 12px;
+}
+
+.progress-info {
+  display: flex;
+
+  justify-content: space-between;
+}
+
+.progress-info span {
+  color: #cbd5e1;
+}
+
+.progress-info strong {
+  color: #7dd3fc;
+}
+
+.progress-bar {
+  height: 10px;
+
+  border-radius: 999px;
+
+  overflow: hidden;
+
+  background:
+    rgba(255,255,255,.08);
+}
+
+.progress-bar div {
+  height: 100%;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #38bdf8,
+      #8b5cf6
+    );
+}
+
+.recommendation-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(3,1fr);
+
+  gap: 20px;
+}
+
+.recommendation-card {
+  padding: 28px;
+
+  border-radius: 26px;
+
+  background:
+    rgba(255,255,255,.05);
+
+  border:
+    1px solid rgba(255,255,255,.08);
+}
+
+.recommendation-card span {
+  display: block;
+
+  margin-bottom: 18px;
+
+  font-size: 36px;
+}
+
+.recommendation-card h3 {
+  margin-bottom: 12px;
+
+  color: white;
+  font-size: 24px;
+}
+
+.recommendation-card p {
+  color: #cbd5e1;
+
+  line-height: 1.7;
+}
+
+@media (max-width: 1000px) {
+
+  .progress-list,
+  .recommendation-grid {
+
+    grid-template-columns:
+      repeat(2,1fr);
+  }
+
+  .progress-metrics {
+    grid-template-columns:
+      repeat(2,1fr);
+  }
+}
+
+@media (max-width: 700px) {
+
+  .progress-list,
+  .recommendation-grid,
+  .progress-metrics {
+
+    grid-template-columns: 1fr;
+  }
+
+  .progress-hero {
+    padding: 30px;
+  }
+
+  .progress-hero h1 {
+    font-size: 36px;
+  }
+}

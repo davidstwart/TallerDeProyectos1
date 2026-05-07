@@ -1,0 +1,49 @@
+INSERT INTO rol (
+    id_rol,
+    nombre
+)
+VALUES
+(1, 'ADMINISTRADOR'),
+(2, 'DOCENTE'),
+(3, 'ESTUDIANTE');
+
+
+
+INSERT INTO usuario (
+    nombres,
+    apellidos,
+    correo,
+    password,
+    id_rol
+)
+VALUES (
+    'Admin',
+    'Sistema',
+    'admin@eduia.com',
+    '$2b$12$xVuHr/Cr9kuce080F5i6uun2x/0TJL8IDzVfK3AsFzDK5NJTG2Hpe',
+    1
+),
+(
+    'Carlos',
+    'Docente',
+    'docente@eduia.com',
+    '$2b$12$xVuHr/Cr9kuce080F5i6uun2x/0TJL8IDzVfK3AsFzDK5NJTG2Hpe',
+    2
+),
+ (
+    'Rosalyn',
+    'Estudiante',
+    'estudiante@eduia.com',
+    '$2b$12$xVuHr/Cr9kuce080F5i6uun2x/0TJL8IDzVfK3AsFzDK5NJTG2Hpe',
+    3
+);
+
+
+
+Pruebas:
+
+Admin: admin@eduia.com
+Docente: docente@eduia.com
+Estudiante: estudiante@eduia.com
+contrasenia: 123456
+

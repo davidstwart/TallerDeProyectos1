@@ -1,0 +1,58 @@
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+
+  padding: 14px 22px;
+
+  border: none;
+
+  border-radius: 999px;
+
+  cursor: pointer;
+
+  font-weight: 800;
+
+  transition: var(--transition-default);
+}
+
+.btn-primary {
+
+  background:
+    linear-gradient(
+      135deg,
+      var(--color-primary),
+      #818cf8
+    );
+
+  color: #020617;
+}
+
+.btn-primary:hover {
+
+  transform: translateY(-2px);
+
+  box-shadow: var(--shadow-secondary);
+}
+
+.btn-secondary {
+
+  background:
+    rgba(255,255,255,0.08);
+
+  color: white;
+
+  border:
+    1px solid rgba(255,255,255,0.14);
+}
+
+.btn-danger {
+
+  background:
+    linear-gradient(
+      135deg,
+      #ef4444,
+      #f97316
+    );
+
+  color: white;
+}
