@@ -14,6 +14,10 @@ from infrastructure.security.password_manager import (
     hash_password
 )
 
+# =====================================
+# DB SESSION
+# =====================================
+
 db = SessionLocal()
 
 # =====================================
@@ -166,9 +170,6 @@ if not student_exists:
 
         celular="977777777",
 
-        password=
-            hash_password("123456"),
-
         grado="5to",
 
         seccion="A",
@@ -184,10 +185,16 @@ if not student_exists:
     db.add(student)
 
 # =====================================
-# SAVE
+# COMMIT
 # =====================================
 
 db.commit()
+
+# =====================================
+# CLOSE
+# =====================================
+
+db.close()
 
 print(
     "Seed ejecutado correctamente"

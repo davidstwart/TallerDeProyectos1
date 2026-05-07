@@ -63,7 +63,7 @@ hay un monton
 ## LEVANTAR EL SERVICIO
 
 ```bash
-python ./infraestructure/database/seeds/seed.py
+python -m infrastructure.database.seeds.seed
 python -m uvicorn main:app --reload --host localhost --port 8000
 ```
 
