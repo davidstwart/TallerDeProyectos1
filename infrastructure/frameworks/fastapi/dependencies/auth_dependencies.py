@@ -6,7 +6,7 @@ from infrastructure.adapters.output.repositories.mysql_usuario_repository import
     MySQLUsuarioRepository
 )
 
-from application.useCases.auth_use_case import (
+from application.use_cases.auth_use_case import (
     AuthUseCase
 )
 

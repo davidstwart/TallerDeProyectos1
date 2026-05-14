@@ -6,7 +6,7 @@ from infrastructure.adapters.output.repositories.session_repository import (
     InMemorySessionRepository
 )
 
-from application.useCases.machine_learning_use_case import (
+from application.use_cases.machine_learning_use_case import (
     MachineLearningUseCase
 )
 

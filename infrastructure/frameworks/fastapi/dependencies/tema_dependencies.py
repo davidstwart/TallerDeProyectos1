@@ -1,4 +1,4 @@
-from application.useCases.tema_use_case import (
+from application.use_cases.tema_use_case import (
     TemaUseCase
 )
 

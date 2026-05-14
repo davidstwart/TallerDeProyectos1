@@ -3,36 +3,40 @@
 main.py
 Propósito: Archivo principal que arranca la aplicación FastAPI y configura la API.
 Qué hace:
+
 - Crea la instancia de FastAPI con metadata (título, descripción, versión) y especifica docs/redoc.
 - Configura CORS para permitir orígenes y métodos durante el desarrollo.
 - Define un manejador global de excepciones para devolver respuestas estructuradas ante errores.
 - Define modelos de datos para autenticación (UserRole, RegisterRequest, LoginRequest) aunque las rutas de registro/login están comentadas.
 - Importa y registra routers: ia_lab_router, auth_router, root_router y health_router.
-Interacciones:
+  Interacciones:
 - Es el punto de entrada de la API. Las peticiones llegan a través de las rutas expuestas por los routers y, en particular, IA Lab, se enrutan a ia_lab_router para su procesamiento.
 
 infrastructure/frameworks/fastapi/ia_lab_router.py
 Propósito: Router específico para IA Lab en FastAPI.
 Qué hace:
+
 - Define el prefijo de rutas /api/v1/ia-lab y las operaciones disponibles: list_models, generate_dataset, upload_dataset, get_dataset_info, train_model, load_model, predict.
-- Usa dependency injection (Depends) para obtener el UseCase IA Lab (IALabUseCase) a través get_use_case(), que crea una instancia con un repositorio en memoria (_repo).
+- Usa dependency injection (Depends) para obtener el UseCase IA Lab (IALabUseCase) a través get_use_case(), que crea una instancia con un repositorio en memoria (\_repo).
 - Valida entradas y formatea respuestas mediante los DTOs definidos en IA Lab.
 - Maneja errores y devuelve respuestas en formato de DTOs de salida.
-Interacciones:
+  Interacciones:
 - Actúa como puente entre las rutas HTTP y la lógica de negocio (UseCase). Recibe requests, invoca métodos del UseCase y devuelve resultados estructurados.
 
 application/dto/ia_lab_dto.py
 Propósito: Definir DTOs para requests y responses de IA Lab.
 Qué hace:
+
 - Define modelos de entrada: GenerateDatasetRequest, TrainModelRequest, PredictRequest, LoadModelRequest.
 - Define modelos de salida: DatasetInfoResponse, TrainModelResponse, PredictResponse, UploadCSVResponse, ModelsInfoResponse.
 - Incluye ModelName como un Literal con opciones permitidas para modelos (Logistic Regression, Decision Tree, etc.).
 - Interacciones:
 - Sirve como contrato de serialización/deserialización para las peticiones y respuestas; facilita validación de datos y documentación de la API (OpenAPI).
 
-application/useCases/ia_lab_use_case.py
+application/use_cases/ia_lab_use_case.py
 Propósito: Implementación de los casos de uso de IA Lab.
 Qué hace:
+
 - Mantiene AVAILABLE_MODELS con descripciones y hiperparámetros por modelo.
 - init(self, session_repo): recibe un repositorio de sesión (ISessionRepository).
 - generate_simulated_dataset(n_samples): genera un dataset sintético, crea un session_id y guarda el DataFrame en el repositorio; devuelve session_id y DatasetInfo.
@@ -41,7 +45,7 @@ Qué hace:
 - train_model(session_id, model_name, params, test_size): prepara X e y, realiza división, normaliza, crea el modelo, entrena, evalúa y persiste el modelo entrenado; devuelve TrainingResult con métricas y outputs.
 - load_model(model_id): carga un modelo previamente guardado y crea una nueva sesión para predicción; devuelve session_id.
 - predict(session_id, features): carga el modelo de la sesión, transforma las características, realiza predicción y devuelve PredictionResult con predicción y probabilidades si están disponibles.
-- Helpers: _build_simulated_df, _build_dataset_info, _build_model para generar datos, crear info de dataset y construir modelos.
+- Helpers: \_build_simulated_df, \_build_dataset_info, \_build_model para generar datos, crear info de dataset y construir modelos.
 - Interacciones:
 - Es el motor de negocio que recibe las llamadas desde IA Lab Router y realiza todas las operaciones de manipulación de datos, entrenamiento y predicción, y luego expone resultados empaquetados en dataclasses de dominio para ser convertidos a DTOs por el router.
 
@@ -60,6 +64,7 @@ Sirven como contenedores de datos que se transfieren entre la capa de negocio y 
 application/ports/input/ia_lab_input_port.py
 Propósito: Definir la interfaz de los casos de uso (port de entrada).
 Qué hace:
+
 - Define métodos abstractos:
 - generate_simulated_dataset(n_samples) -> (session_id, DatasetInfo)
 - upload_csv_dataset(content, filename, target_column) -> (session_id, columnas, total)
@@ -74,6 +79,7 @@ Qué hace:
 application/ports/output/ia_lab_output_port.py
 Propósito: Definir la interfaz de persistencia (port de salida).
 Qué hace:
+
 - Define métodos abstractos:
 - save_dataframe(session_id, df, target_column)
 - get_dataframe(session_id) -> Optional[(pd.DataFrame, target_column)]

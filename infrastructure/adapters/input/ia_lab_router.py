@@ -11,7 +11,7 @@ from application.dto.ia_lab_dto import (
     TrainModelResponse,
     UploadCSVResponse,
 )
-from application.useCases.ia_lab_use_case import IALabUseCase
+from application.use_cases.ia_lab_use_case import IALabUseCase
 from infrastructure.adapters.output.repositories.session_repository import InMemorySessionRepository
 
 # ── Dependency injection (singleton in-memory repo) ───────────────────────────
